@@ -1,4 +1,4 @@
-# Kickoff Prompt
+# Manual Prompts
 
 > **Note:** This file is kept as a reference. If you're using OpenCode, use the `/kickoff`, `/resume`, and `/change` commands instead — they do the same thing automatically.
 

@@ -30,7 +30,7 @@ project-root/
 │   ├── changelog.md              log of all code changes
 │   ├── references/               context for the LLM (screenshots, logs, mockups)
 │   └── assets/                   app files for the LLM to integrate (originals stay here)
-├── kickoff-prompt.md             copy-paste prompts for non-OpenCode tools
+├── manual-prompts.md             copy-paste prompts for non-OpenCode tools
 └── src/
     └── ...                       implemented code
 ```
@@ -53,7 +53,7 @@ Processes outstanding change requests. The LLM reads the current PRD and `design
 
 ## Using without OpenCode
 
-If you're using Cursor, Claude, ChatGPT, or any other tool, copy and paste the prompts from `kickoff-prompt.md` instead.
+If you're using Cursor, Claude, ChatGPT, or any other tool, copy and paste the prompts from `manual-prompts.md` instead.
 
 ## Getting started
 

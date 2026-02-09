@@ -23,7 +23,7 @@ project-root/
 │   │   └── ...
 │   └── assets/                 # app files for the LLM to integrate (originals stay here)
 │       └── ...
-├── kickoff-prompt.md           # reference — copy-paste prompts for non-OpenCode tools
+├── manual-prompts.md           # reference — copy-paste prompts for non-OpenCode tools
 └── src/
     └── ...                     # implemented code
 ```
