@@ -9,6 +9,7 @@ A reusable project template for building Cloudflare Developer Platform products 
 3. **Say "generate PRD"** — the LLM writes a structured PRD to `design/prd.md`
 4. **Write change requests** in `design/change-request.md` as you iterate
 5. **Run `/change`** — the LLM implements the requests, updates the PRD, and logs everything
+6. **Starting a new session?** Run `/resume` first to get the LLM up to speed, then `/change`
 
 Every decision, change, and its rationale lives in files — not buried in chat history.
 
@@ -19,6 +20,7 @@ project-root/
 ├── .opencode/
 │   └── commands/
 │       ├── kickoff.md            /kickoff — start PRD discovery
+│       ├── resume.md             /resume  — catch up a new LLM session
 │       └── change.md             /change  — implement change requests
 ├── design/
 │   ├── prd-creator.md            instructions and PRD format for the LLM
@@ -35,11 +37,15 @@ project-root/
 
 ## OpenCode commands
 
-This template includes two custom [OpenCode](https://opencode.ai) commands in `.opencode/commands/`:
+This template includes three custom [OpenCode](https://opencode.ai) commands in `.opencode/commands/`:
 
 ### `/kickoff`
 
 Starts the PRD discovery phase. The LLM reads `design/prd-creator.md` and `design/initial-idea.md`, then asks you clarifying questions before proposing anything. When you're satisfied, say "generate PRD" and it writes the output to `design/prd.md`.
+
+### `/resume`
+
+Catches up a new LLM session on the current project state. The LLM reads the PRD, changelog, and change requests, then explores the existing code in `src/`. It gives you a summary of what's been built, what's outstanding, and any questions — without making changes until you say so. Run this at the start of every new session before `/change`.
 
 ### `/change`
 

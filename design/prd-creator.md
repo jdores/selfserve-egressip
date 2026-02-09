@@ -11,6 +11,7 @@ project-root/
 ├── .opencode/
 │   └── commands/
 │       ├── kickoff.md          # /kickoff — start PRD discovery
+│       ├── resume.md           # /resume  — catch up a new LLM session
 │       └── change.md           # /change  — implement change requests
 ├── design/
 │   ├── prd-creator.md          # this file — instructions and PRD format
