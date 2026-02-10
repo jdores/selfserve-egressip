@@ -38,6 +38,7 @@ Or copy and paste this:
 
 Read the following files to understand the current state of this project:
 - `design/prd-creator.md` — your instructions and behavioral rules
+- `design/rules.md` — repository rules you must follow
 - `design/prd.md` — the current PRD
 - `design/changelog.md` — log of all changes made so far
 - `design/change-request.md` — outstanding and finalized change requests

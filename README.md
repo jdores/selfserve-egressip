@@ -69,7 +69,7 @@ cd my-new-project
 ```
 
 Then:
-1. Create `design/initial-idea.md` with your product idea
+1. Edit `design/initial-idea.md` with your product idea
 2. Open OpenCode and run `/kickoff`
 
 ## Key conventions

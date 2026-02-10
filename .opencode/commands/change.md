@@ -16,4 +16,5 @@ Implement the outstanding change requests. For each one:
 3. Implement the code changes in `src/`
 4. Update `design/prd.md` to reflect the new state
 5. Move the request from **Outstanding** to **Finalized** in `design/change-request.md`
-6. Log what you did in `design/changelog.md`
+6. Update `README.md` to reflect the current state of the project
+7. Log what you did in `design/changelog.md`
