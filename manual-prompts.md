@@ -1,6 +1,6 @@
 # Manual Prompts
 
-> **Note:** This file is kept as a reference. If you're using OpenCode, use the `/kickoff`, `/resume`, and `/change` commands instead — they do the same thing automatically.
+> **Note:** This file is kept as a reference. If you're using OpenCode, use the `/kickoff`, `/resume`, `/change`, and `/push` commands instead — they do the same thing automatically.
 
 ## Starting the PRD discovery
 
@@ -79,4 +79,25 @@ Implement the outstanding change requests. For each one:
 3. Implement the code changes in `src/`
 4. Update `design/prd.md` to reflect the new state
 5. Move the request from **Outstanding** to **Finalized** in `design/change-request.md`
-6. Log what you did in `design/changelog.md`
+6. Update `README.md` to reflect the current state of the project
+7. Log what you did in `design/changelog.md`
+
+---
+
+## Pushing code to remote
+
+In OpenCode, type:
+
+```
+/push
+```
+
+Or copy and paste this:
+
+---
+
+Before pushing, follow these steps in order:
+
+1. **First push only:** If no remote has been configured yet, ask me for the repository URL and set it up.
+2. **Secrets audit:** Scan the entire project directory for passwords, secrets, API keys, tokens, and credentials. Report any findings and stop — do not push until I confirm the issue is resolved.
+3. **Push:** If the audit is clean, push the current branch to the remote.

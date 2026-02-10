@@ -21,8 +21,10 @@ project-root/
 │   └── commands/
 │       ├── kickoff.md            /kickoff — start PRD discovery
 │       ├── resume.md             /resume  — catch up a new LLM session
-│       └── change.md             /change  — implement change requests
+│       ├── change.md             /change  — implement change requests
+│       └── push.md               /push    — push code to remote repository
 ├── design/
+│   ├── rules.md                  repository rules for the LLM
 │   ├── prd-creator.md            instructions and PRD format for the LLM
 │   ├── initial-idea.md           your raw product idea (you create this)
 │   ├── prd.md                    generated PRD (kept up to date)
@@ -37,7 +39,7 @@ project-root/
 
 ## OpenCode commands
 
-This template includes three custom [OpenCode](https://opencode.ai) commands in `.opencode/commands/`:
+This template includes four custom [OpenCode](https://opencode.ai) commands in `.opencode/commands/`:
 
 ### `/kickoff`
 
@@ -49,7 +51,11 @@ Catches up a new LLM session on the current project state. The LLM reads the PRD
 
 ### `/change`
 
-Processes outstanding change requests. The LLM reads the current PRD and `design/change-request.md`, implements each request, updates the PRD, moves completed requests to the Finalized section, and logs everything to `design/changelog.md`.
+Processes outstanding change requests. The LLM reads the current PRD and `design/change-request.md`, implements each request, updates the PRD and `README.md`, moves completed requests to the Finalized section, and logs everything to `design/changelog.md`.
+
+### `/push`
+
+Pushes code to the remote repository. The LLM will never push code unless you explicitly run this command. On first push, it asks for the repository URL. Before every push, it audits the project directory for passwords, secrets, API keys, and tokens — and stops if anything is found.
 
 ## Using without OpenCode
 
@@ -73,3 +79,6 @@ Then:
 - **`design/prd.md`** is always kept up to date — it represents the current spec, not the original
 - **`design/changelog.md`** tracks every code change with timestamps, files modified, and linked requirements
 - **`design/change-request.md`** uses numbered IDs (CR-001, CR-002, ...) with priority, description, and acceptance criteria
+- **`design/rules.md`** defines repository rules the LLM must always follow (MIT license, secrets audit, push policy)
+- Code is **never pushed** without an explicit `/push` command
+- All projects use the **MIT License**

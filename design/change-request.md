@@ -7,7 +7,8 @@
 > 4. Implement the code changes in `src/`.
 > 5. Update `design/prd.md` to reflect the change.
 > 6. Move the completed request from **Outstanding** to **Finalized** below.
-> 7. Append an entry to `design/changelog.md`.
+> 7. Update `README.md` to reflect the current state of the project.
+> 8. Append an entry to `design/changelog.md`.
 
 ---
 
