@@ -1,0 +1,31 @@
+name = "selfserve-egress"
+main = "src/index.ts"
+compatibility_date = "2025-02-10"
+account_id = "36ddb61117ace3ebf47bbc1e91502a71"
+
+# Disable *.workers.dev hostname — custom domain only
+workers_dev = false
+
+# Custom domain
+routes = [
+  { pattern = "selfservegress.jdores.xyz", custom_domain = true }
+]
+
+# Workers Observability — logs, errors, and invocations visible in the dashboard
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+# Cron Trigger — audit log cleanup daily at midnight UTC
+[triggers]
+crons = ["0 0 * * *"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "selfservegress"
+database_id = "a7252a4b-c727-4d1e-9438-87f4c0e29a88"
+
+# Environment variables
+[vars]
+EGRESS_LOCATIONS = '[{"id":"d7e99b05-a207-4ae1-981a-9db2f6a12298","name":"United Kingdom"},{"id":"bbea2d64-c173-4558-a314-6aaf7acde9d1","name":"Germany"},{"id":"a0832bb1-4da8-4a66-b9c5-32b5963b48a1","name":"United States (New York)"},{"id":"67a93ec7-9970-4c87-a537-a7ce6ec70277","name":"Japan"},{"id":"04eeb115-ccf0-47f1-9e7f-9bc67c7a122e","name":"Portugal"}]'

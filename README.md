@@ -1,84 +1,138 @@
-# New Project Template
+# Self-Serve Egress Location Selector
 
-A reusable project template for building Cloudflare Developer Platform products using an AI-assisted workflow. The idea is to go from a raw product idea to a technical PRD to working code, with an LLM as your collaborator at every step.
+A Cloudflare Worker application that lets WARP users self-select their egress location by updating Zero Trust Gateway lists.
 
-## How it works
+## Features
 
-1. **Write your idea** in `design/initial-idea.md`
-2. **Run `/kickoff`** — the LLM reads your idea and asks clarifying questions (Discovery phase)
-3. **Say "generate PRD"** — the LLM writes a structured PRD to `design/prd.md`
-4. **Write change requests** in `design/change-request.md` as you iterate
-5. **Run `/change`** — the LLM implements the requests, updates the PRD, and logs everything
-6. **Starting a new session?** Run `/resume` first to get the LLM up to speed, then `/change`
+- **User self-service** — Authenticated users pick an egress location from a clean web UI at `selfservegress.jdores.xyz`
+- **Admin dashboard** — Admins view all assignments and manually assign/remove users at `/admin`
+- **Audit log** — All state-changing actions logged to D1 with 90-day retention, viewable in the admin Logs tab
+- **Zero Trust integration** — Reads and updates Cloudflare Zero Trust Gateway lists via API (sole source of truth, no caching)
+- **Location widget** — Shows the user's current observed location (city, country, IP) with a refresh button to confirm egress changes
+- **Debug panel** — Collapsible footer panel shows user email and assignment details for troubleshooting
+- **Workers Observability** — Invocation logs, console output, and errors captured in the Cloudflare dashboard
 
-Every decision, change, and its rationale lives in files — not buried in chat history.
+## How It Works
 
-## Project structure
+This app automates user assignment to Cloudflare Gateway **egress policies**. An admin pre-configures egress policies in the Cloudflare dashboard, each with:
 
-```
-project-root/
-├── .opencode/
-│   └── commands/
-│       ├── kickoff.md            /kickoff — start PRD discovery
-│       ├── resume.md             /resume  — catch up a new LLM session
-│       ├── change.md             /change  — implement change requests
-│       └── push.md               /push    — push code to remote repository
-├── design/
-│   ├── rules.md                  repository rules for the LLM
-│   ├── prd-creator.md            instructions and PRD format for the LLM
-│   ├── initial-idea.md           your raw product idea (you create this)
-│   ├── prd.md                    generated PRD (kept up to date)
-│   ├── change-request.md         outstanding and finalized change requests
-│   ├── changelog.md              log of all code changes
-│   ├── references/               context for the LLM (screenshots, logs, mockups)
-│   └── assets/                   app files for the LLM to integrate (originals stay here)
-├── manual-prompts.md             copy-paste prompts for non-OpenCode tools
-└── src/
-    └── ...                       implemented code
-```
+- A **dedicated egress IP** at a specific geolocation (e.g., `8.29.230.206` in Hounslow, GB)
+- An **identity filter** that matches users whose email is in a specific **Zero Trust list** (e.g., `self-serve-egressip-uk`)
 
-## OpenCode commands
+When a user selects a location in the app, the Worker adds their email to the corresponding Zero Trust list via the Cloudflare API. This causes the user's WARP traffic to match the egress policy linked to that list, routing their traffic through the dedicated IP and geolocation. Users not on any list use the default Cloudflare egress (nearest IP).
 
-This template includes four custom [OpenCode](https://opencode.ai) commands in `.opencode/commands/`:
+| Egress Policy | Dedicated IP | Geolocation | Zero Trust List |
+|---|---|---|---|
+| Self-serve egress → UK | 8.29.230.206 | Hounslow, GB | `self-serve-egressip-uk` |
+| Self-serve egress → PT | 8.29.231.207 | Montijo, PT | `self-serve-egressip-pt` |
+| Self-serve egress → DE | 8.29.230.207 | Dreieich, DE | `self-serve-egressip-de` |
+| Self-serve egress → US/NY | 104.30.162.103 | New York, US | `self-serve-egressip-us-ny` |
+| Self-serve egress → JP | 8.29.109.45 | Narita, JP | `self-serve-egressip-jp` |
 
-### `/kickoff`
+**Egress policies in the Cloudflare dashboard:**
 
-Starts the PRD discovery phase. The LLM reads `design/prd-creator.md` and `design/initial-idea.md`, then asks you clarifying questions before proposing anything. When you're satisfied, say "generate PRD" and it writes the output to `design/prd.md`.
+![Egress Policies](design/references/egresspolicies01.png)
 
-### `/resume`
+**Policy detail — shows the identity filter (User Email in list) and egress IPs:**
 
-Catches up a new LLM session on the current project state. The LLM reads the PRD, changelog, and change requests, then explores the existing code in `src/`. It gives you a summary of what's been built, what's outstanding, and any questions — without making changes until you say so. Run this at the start of every new session before `/change`.
+![Egress Policy Detail](design/references/egresspolicies02.png)
 
-### `/change`
+**Zero Trust lists managed by the Worker:**
 
-Processes outstanding change requests. The LLM reads the current PRD and `design/change-request.md`, implements each request, updates the PRD and `README.md`, moves completed requests to the Finalized section, and logs everything to `design/changelog.md`.
+![Zero Trust Lists](design/references/zerotrustlist02.png)
 
-### `/push`
+## Architecture
 
-Pushes code to the remote repository. The LLM will never push code unless you explicitly run this command. On first push, it asks for the repository URL. Before every push, it audits the project directory for passwords, secrets, API keys, and tokens — and stops if anything is found.
+| Service | Purpose |
+|---|---|
+| **Workers** | Serves UI and API routes |
+| **D1** (`selfservegress`) | Audit log (time-ordered, queryable) |
+| **Cloudflare Access** | Authentication (configured manually) |
+| **Zero Trust Gateway Lists API** | Sole source of truth for list membership |
+| **Cron Trigger** | Daily cleanup of audit log entries older than 90 days |
 
-## Using without OpenCode
+## Routes
 
-If you're using Cursor, Claude, ChatGPT, or any other tool, copy and paste the prompts from `manual-prompts.md` instead.
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | User-facing egress location selector |
+| GET | `/whoami` | Returns user's current location and IP (JSON) |
+| POST | `/select` | Assign user to a location |
+| POST | `/reset` | Reset user to default (no egress policy) |
+| GET | `/admin` | Admin dashboard (reads live from API) |
+| POST | `/admin/assign` | Admin assigns a user to a location |
+| POST | `/admin/remove` | Admin removes a user from their location |
+| GET | `/admin/logs` | Paginated audit log entries |
 
-## Getting started
+## Setup
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
+- A Cloudflare account with Zero Trust enabled
+
+### 1. Install dependencies
 
 ```bash
-git clone https://github.com/jdores/new-project-template.git my-new-project
-cd my-new-project
+npm install
 ```
 
-Then:
-1. Edit `design/initial-idea.md` with your product idea
-2. Open OpenCode and run `/kickoff`
+### 2. Create D1 database
 
-## Key conventions
+```bash
+wrangler d1 create selfservegress
+```
 
-- **`design/references/`** is for context only (screenshots, logs, mockups) — these files are never deployed
-- **`design/assets/`** is for app files the LLM should integrate into the project — originals always stay here
-- **`design/prd.md`** is always kept up to date — it represents the current spec, not the original
-- **`design/changelog.md`** tracks every code change with timestamps, files modified, and linked requirements
-- **`design/change-request.md`** uses numbered IDs (CR-001, CR-002, ...) with priority, description, and acceptance criteria
-- **`design/rules.md`** defines repository rules the LLM must always follow (MIT license, secrets audit, push policy)
-- Code is **never pushed** without an explicit `/push` command
-- All projects use the **MIT License**
+Copy the output `database_id` into `wrangler.toml` under `[[d1_databases]]`.
+
+### 3. Initialize D1 schema
+
+```bash
+npm run db:init
+```
+
+### 4. Set secrets
+
+```bash
+wrangler secret put CF_ACCOUNT_ID
+wrangler secret put CF_API_TOKEN
+```
+
+The API token needs **Zero Trust: Edit** permissions at the account level.
+
+### 5. Configure Cloudflare Access
+
+Manually create two Access applications:
+
+1. **User app** — protects `selfservegress.jdores.xyz` for all authorized users
+2. **Admin app** — protects `selfservegress.jdores.xyz/admin*` with a stricter policy
+
+### 6. Deploy
+
+```bash
+npm run deploy
+```
+
+## Development
+
+This project has no external runtime dependencies. All HTML/CSS is generated inline by the Worker.
+
+```
+src/
+├── index.ts               # Request router + cron handler
+├── auth.ts                # JWT email extraction from Access header
+├── api.ts                 # Zero Trust Gateway Lists API client + live state helpers
+├── db.ts                  # D1 audit log helpers
+├── handlers/
+│   ├── user.ts            # User-facing route handlers
+│   └── admin.ts           # Admin route handlers
+├── ui/
+│   ├── user-page.ts       # User page HTML template
+│   └── admin-page.ts      # Admin page HTML template
+└── types.ts               # TypeScript type definitions
+```
+
+## License
+
+MIT
