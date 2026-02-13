@@ -141,6 +141,18 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_target ON audit_log(target_email);
 |---|---|---|
 | `EGRESS_LOCATIONS` | `string` (JSON) | `'[{"id":"d7e99b05-a207-4ae1-981a-9db2f6a12298","name":"United Kingdom"},{"id":"bbea2d64-c173-4558-a314-6aaf7acde9d1","name":"Germany"},{"id":"a0832bb1-4da8-4a66-b9c5-32b5963b48a1","name":"United States (New York)"},{"id":"67a93ec7-9970-4c87-a537-a7ce6ec70277","name":"Japan"},{"id":"04eeb115-ccf0-47f1-9e7f-9bc67c7a122e","name":"Portugal"}]'` |
 
+**Configuring `EGRESS_LOCATIONS`:**
+
+The `EGRESS_LOCATIONS` variable in `wrangler.toml` must be edited to match the Zero Trust lists and egress policies that have been pre-configured in the Cloudflare dashboard. Each entry maps a Zero Trust list to a user-facing location name:
+
+- `id` — The UUID of the Zero Trust list (found in the Cloudflare dashboard under Gateway > Lists, or via the API). This is the list the Worker will add/remove user emails from.
+- `name` — The human-readable location name displayed in the UI (e.g., "United Kingdom", "Japan"). This should match the geolocation of the corresponding egress policy.
+
+Before deploying, the admin must:
+1. Create the Zero Trust lists (type "User Emails") in the Cloudflare dashboard — one per egress location.
+2. Create the egress policies (under Gateway > Egress Policies) — each with a dedicated egress IP, geolocation, and an identity filter set to "User Email in list" pointing to the corresponding Zero Trust list.
+3. Copy each list's UUID from the dashboard and update the `EGRESS_LOCATIONS` JSON array in `wrangler.toml` with the correct `id` and `name` pairs.
+
 **Wrangler Secrets (set via `wrangler secret put`):**
 
 | Secret | Purpose |
@@ -469,7 +481,7 @@ The response uses page-based pagination (`page`, `per_page`, `total_pages`, `tot
 ### Security Requirements
 - **Authentication:** Cloudflare Access handles authentication. The Worker validates the presence of the `Cf-Access-Jwt-Assertion` header and extracts the email from the payload. No signature validation is performed (Access has already validated the token).
 - **Authorization:** Two separate Access applications (configured manually): one for `/` (all authorized users) and one for `/admin` (admins only).
-- **Secrets:** `CF_ACCOUNT_ID` and `CF_API_TOKEN` are stored as Worker secrets via `wrangler secret put`. They must never appear in code, config files, or logs.
+- **Secrets:** `CF_ACCOUNT_ID` and `CF_API_TOKEN` are stored as Worker secrets via `wrangler secret put`. They must never appear in code, config files, or logs. The `account_id` field is intentionally omitted from `wrangler.toml` — Wrangler resolves the account from the `CLOUDFLARE_ACCOUNT_ID` environment variable or interactive prompt at deploy time.
 - **Input validation:** All user-provided inputs (email, listId) are validated before use.
 
 ### Observability
@@ -540,11 +552,14 @@ project-root/
 
 ### Manual Setup Required (outside of code)
 
+- **Zero Trust lists:** Create one Zero Trust list (type "User Emails") per egress location in the Cloudflare dashboard under Gateway > Lists. Copy each list's UUID.
+- **Egress policies:** Create one egress policy per location under Gateway > Egress Policies. Each policy needs a dedicated egress IP/geolocation and an identity filter set to "User Email in list `<list-name>`".
+- **`EGRESS_LOCATIONS` in `wrangler.toml`:** Update the JSON array with the list UUIDs and location names from the steps above.
 - **Cloudflare Access Application (user):** Must be configured manually to protect `selfservegress.jdores.xyz` (all paths except `/admin*`), or the entire domain with a separate policy for `/admin`.
 - **Cloudflare Access Application (admin):** Must be configured manually to protect `selfservegress.jdores.xyz/admin*` with a stricter policy.
 - **DNS:** `selfservegress.jdores.xyz` must be proxied through Cloudflare (configured as part of the custom domain setup in `wrangler.toml`, but the DNS zone must exist).
 - **D1 Database:** Created via `wrangler d1 create selfservegress` — the ID goes into `wrangler.toml`. Schema initialized via `wrangler d1 execute selfservegress --file=schema.sql`.
-- **Secrets:** `CF_ACCOUNT_ID` and `CF_API_TOKEN` set via `wrangler secret put`.
+- **Secrets:** `CF_ACCOUNT_ID` and `CF_API_TOKEN` set via `wrangler secret put`. For deploys, set `CLOUDFLARE_ACCOUNT_ID` as an environment variable or let Wrangler prompt interactively (since `account_id` is not in `wrangler.toml`).
 
 ---
 

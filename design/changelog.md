@@ -182,3 +182,27 @@ Note: The CR referenced `zerotrustlist01.png` but the actual file in `design/ref
 
 ### Requirements covered
 - CR-008
+
+## 2026-02-13 — CR-009: Remove account_id from wrangler.toml
+
+Removed the `account_id` line from `wrangler.toml` since `CF_ACCOUNT_ID` is already set as a Worker secret. Wrangler resolves the account from the `CLOUDFLARE_ACCOUNT_ID` environment variable or interactive prompt at deploy time.
+
+### Files modified
+- `wrangler.toml` — Removed `account_id` line
+- `design/prd.md` — Updated security requirements to note `account_id` is intentionally omitted from `wrangler.toml`; updated Manual Setup section
+- `README.md` — Updated deploy step to show `CLOUDFLARE_ACCOUNT_ID` env var usage
+
+### Requirements covered
+- CR-009
+
+## 2026-02-13 — CR-010: Improve documentation — EGRESS_LOCATIONS configuration
+
+Added documentation explaining that `EGRESS_LOCATIONS` in `wrangler.toml` must be edited to match the Zero Trust lists and egress policies pre-configured in the Cloudflare dashboard. Each entry's `id` is the UUID of a Zero Trust list and `name` is the location label shown in the UI.
+
+### Files modified
+- `design/prd.md` — Added "Configuring EGRESS_LOCATIONS" subsection explaining the `id` and `name` fields and the prerequisite dashboard setup; added Zero Trust lists and egress policies to Manual Setup section
+- `README.md` — Added "Configure egress locations" as step 1 in Setup with instructions for creating lists, egress policies, and updating `wrangler.toml`; renumbered subsequent steps
+- `design/change-request.md` — Moved CR-009 and CR-010 to Finalized
+
+### Requirements covered
+- CR-010

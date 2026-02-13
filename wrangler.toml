@@ -1,7 +1,6 @@
 name = "selfserve-egress"
 main = "src/index.ts"
 compatibility_date = "2025-02-10"
-account_id = "36ddb61117ace3ebf47bbc1e91502a71"
 
 # Disable *.workers.dev hostname — custom domain only
 workers_dev = false

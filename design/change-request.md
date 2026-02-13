@@ -32,6 +32,14 @@
 
 ## Finalized
 
+### CR-010: Improve documentation — EGRESS_LOCATIONS configuration
+**Description:** Added documentation to both the PRD and README explaining that `EGRESS_LOCATIONS` in `wrangler.toml` must be edited with the Zero Trust list UUIDs and location names that correspond to the egress policies pre-configured in the Cloudflare dashboard. Added a new "Configure egress locations" setup step to the README with instructions for creating lists, egress policies, and updating `wrangler.toml`. Updated the PRD data model section with a "Configuring EGRESS_LOCATIONS" subsection and added Zero Trust lists and egress policies to the Manual Setup section.
+**Status:** Completed — 2026-02-13
+
+### CR-009: Remove account_id from wrangler.toml
+**Description:** Removed the `account_id` line from `wrangler.toml` since `CF_ACCOUNT_ID` is already set as a Worker secret. Wrangler resolves the account from the `CLOUDFLARE_ACCOUNT_ID` environment variable at deploy time, or prompts interactively. Updated the PRD security section and manual setup instructions, and updated the README deploy step to show the env var approach.
+**Status:** Completed — 2026-02-13
+
 ### CR-008: Improve documentation
 **Description:** Added a "How It Works" section to both `design/prd.md` and `README.md` explaining the relationship between egress policies, Zero Trust lists, and the Worker. Documents how each egress policy has a dedicated IP and geolocation and is matched by an identity filter tied to a Zero Trust list. When the Worker adds a user's email to a list, the user matches the corresponding egress policy and egresses through that policy's dedicated IP. Includes screenshots from the Cloudflare dashboard (`egresspolicies01.png`, `egresspolicies02.png`, `zerotrustlist02.png`).
 **References:** `design/references/egresspolicies01.png`, `design/references/egresspolicies02.png`, `design/references/zerotrustlist02.png`

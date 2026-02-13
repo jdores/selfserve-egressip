@@ -71,14 +71,34 @@ When a user selects a location in the app, the Worker adds their email to the co
 - [Node.js](https://nodejs.org/) (v18+)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 - A Cloudflare account with Zero Trust enabled
+- Dedicated egress IPs provisioned for each location (requires Enterprise or add-on)
 
-### 1. Install dependencies
+### 1. Configure egress locations
+
+Before deploying, you must set up the egress policies and Zero Trust lists in the Cloudflare dashboard, then configure `wrangler.toml` to reference them.
+
+**a) Create Zero Trust lists** — Go to Gateway > Lists and create one list per egress location (type: "User Emails"). For example: `self-serve-egressip-uk`, `self-serve-egressip-de`, etc.
+
+**b) Create egress policies** — Go to Gateway > Egress Policies and create one policy per location. Each policy needs:
+- A dedicated egress IPv4 and geolocation
+- An identity filter: "User Email" → "in list" → the corresponding Zero Trust list from step (a)
+
+**c) Update `wrangler.toml`** — Edit the `EGRESS_LOCATIONS` variable with each list's UUID and a human-readable name:
+
+```toml
+[vars]
+EGRESS_LOCATIONS = '[{"id":"<list-uuid-1>","name":"United Kingdom"},{"id":"<list-uuid-2>","name":"Germany"}]'
+```
+
+Each `id` is the UUID of the Zero Trust list (visible in the dashboard or via the API). Each `name` is the label shown to users in the UI.
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Create D1 database
+### 3. Create D1 database
 
 ```bash
 wrangler d1 create selfservegress
@@ -86,13 +106,13 @@ wrangler d1 create selfservegress
 
 Copy the output `database_id` into `wrangler.toml` under `[[d1_databases]]`.
 
-### 3. Initialize D1 schema
+### 4. Initialize D1 schema
 
 ```bash
 npm run db:init
 ```
 
-### 4. Set secrets
+### 5. Set secrets
 
 ```bash
 wrangler secret put CF_ACCOUNT_ID
@@ -101,18 +121,22 @@ wrangler secret put CF_API_TOKEN
 
 The API token needs **Zero Trust: Edit** permissions at the account level.
 
-### 5. Configure Cloudflare Access
+### 6. Configure Cloudflare Access
 
 Manually create two Access applications:
 
 1. **User app** — protects `selfservegress.jdores.xyz` for all authorized users
 2. **Admin app** — protects `selfservegress.jdores.xyz/admin*` with a stricter policy
 
-### 6. Deploy
+### 7. Deploy
+
+Since `account_id` is not in `wrangler.toml` (it's a secret), set your account ID as an environment variable before deploying:
 
 ```bash
-npm run deploy
+CLOUDFLARE_ACCOUNT_ID=your-account-id npm run deploy
 ```
+
+Alternatively, Wrangler will prompt you to select an account interactively if the variable is not set.
 
 ## Development
 
