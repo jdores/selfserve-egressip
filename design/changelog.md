@@ -206,3 +206,17 @@ Added documentation explaining that `EGRESS_LOCATIONS` in `wrangler.toml` must b
 
 ### Requirements covered
 - CR-010
+
+## 2026-02-13 — CR-011: Improve documentation — fix PRD.md
+
+Fixed two rendering issues in `design/prd.md`:
+
+1. **Broken images:** The three screenshot references (`egresspolicies01.png`, `egresspolicies02.png`, `zerotrustlist02.png`) used paths relative to the repo root (`design/references/...`) but `prd.md` lives inside `design/`, so markdown renderers couldn't resolve them. Changed to `references/...` (relative to the file's own directory). The same paths in `README.md` were already correct (README is at the repo root).
+
+2. **Broken system diagram:** The ASCII art architecture diagram had structural alignment issues — the left border of the Worker box was missing for the routes and cron trigger lines, and the closing corner was misaligned. Redesigned the diagram with properly enclosed boxes, two-column route layout, and correct box-drawing alignment.
+
+### Files modified
+- `design/prd.md` — Fixed 3 image paths from `design/references/` to `references/`; redesigned the Technical Architecture system diagram
+
+### Requirements covered
+- CR-011

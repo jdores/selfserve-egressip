@@ -35,15 +35,15 @@ The following screenshots show the admin-configured egress policies and lists in
 
 **Egress policies overview** — Each policy has a dedicated IPv4 and geolocation:
 
-![Egress Policies](design/references/egresspolicies01.png)
+![Egress Policies](references/egresspolicies01.png)
 
 **Egress policy detail** — Shows the identity filter matching users whose email is in the corresponding Zero Trust list (`self-serve-egressip-uk`), plus the egress IPs:
 
-![Egress Policy Detail](design/references/egresspolicies02.png)
+![Egress Policy Detail](references/egresspolicies02.png)
 
 **Zero Trust lists** — The "User Emails" lists that the Worker manages via API:
 
-![Zero Trust Lists](design/references/zerotrustlist02.png)
+![Zero Trust Lists](references/zerotrustlist02.png)
 
 ---
 
@@ -52,33 +52,29 @@ The following screenshots show the admin-configured egress policies and lists in
 ### System Diagram
 
 ```
-┌───────────────┐     ┌────────────────────┐     ┌────────────────────────────────┐
-│    Browser    │────▶│  Cloudflare Access  │────▶│       Cloudflare Worker        │
-│  (User/Admin) │     │   (JWT injection)   │     │  selfservegress.jdores.xyz     │
-└───────────────┘     └────────────────────┘     │                                │
-│  Routes:                       │
-│    GET  /                      │
-│    GET  /whoami                │
-│    POST /select                │
-│    POST /reset                 │
-│    GET  /admin                 │
-│    GET  /admin/logs            │
-│    POST /admin/assign          │
-│    POST /admin/remove          │
-                                                  │                                │
-                                                  │  Cron Trigger:                 │
-                                                  │    Daily 00:00 UTC             │
-                                                  │    (audit log cleanup)         │
-                                                  │                                │
-                                                   └──────────────┬──────────┬───┘
-                                                                      │          │
-                                                                      ▼          ▼
-                                                           ┌────────┐ ┌─────────────┐
-                                                           │   D1   │ │  CF Zero    │
-                                                           │ (self- │ │  Trust      │
-                                                           │ serve- │ │  Gateway    │
-                                                           │ gress) │ │  Lists API  │
-                                                           └────────┘ └─────────────┘
+┌─────────────────┐    ┌──────────────────────┐    ┌──────────────────────────────────┐
+│     Browser     │───▶│   Cloudflare Access   │───▶│        Cloudflare Worker         │
+│   (User/Admin)  │    │    (JWT injection)    │    │    selfservegress.jdores.xyz     │
+└─────────────────┘    └──────────────────────┘    │                                  │
+                                                   │  Routes:                         │
+                                                   │    GET  /           GET  /admin   │
+                                                   │    GET  /whoami     POST /admin/  │
+                                                   │    POST /select          assign   │
+                                                   │    POST /reset     POST /admin/   │
+                                                   │                         remove    │
+                                                   │                    GET  /admin/   │
+                                                   │                         logs      │
+                                                   │                                  │
+                                                   │  Cron: Daily 00:00 UTC           │
+                                                   │    (audit log cleanup)            │
+                                                   └──────────┬───────────┬───────────┘
+                                                              │           │
+                                                              ▼           ▼
+                                                   ┌──────────────┐ ┌─────────────────┐
+                                                   │      D1      │ │  CF Zero Trust  │
+                                                   │ (selfserve-  │ │  Gateway Lists  │
+                                                   │    gress)    │ │      API        │
+                                                   └──────────────┘ └─────────────────┘
 ```
 
 ### Cloudflare Services Used

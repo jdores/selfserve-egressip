@@ -26,11 +26,13 @@
 - [ ] Criterion 2
 
 -->
----
-
-*(No outstanding change requests)*
 
 ## Finalized
+
+### CR-011: Improve documentation — fix PRD.md
+**Description:** Fixed broken image paths in `design/prd.md` — changed from `design/references/` to `references/` since the file lives inside `design/`. Redesigned the ASCII system diagram which had missing left borders and misaligned box-drawing characters.
+**References:** `design/references/brokenimage01.png`, `design/references/brokendiagram01.png`
+**Status:** Completed — 2026-02-13
 
 ### CR-010: Improve documentation — EGRESS_LOCATIONS configuration
 **Description:** Added documentation to both the PRD and README explaining that `EGRESS_LOCATIONS` in `wrangler.toml` must be edited with the Zero Trust list UUIDs and location names that correspond to the egress policies pre-configured in the Cloudflare dashboard. Added a new "Configure egress locations" setup step to the README with instructions for creating lists, egress policies, and updating `wrangler.toml`. Updated the PRD data model section with a "Configuring EGRESS_LOCATIONS" subsection and added Zero Trust lists and egress policies to the Manual Setup section.
